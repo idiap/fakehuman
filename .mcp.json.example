@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "fakehuman": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/fakehuman",
+        "run",
+        "--locked",
+        "--extra",
+        "cpu",
+        "fakehuman"
+      ]
+    }
+  }
+}

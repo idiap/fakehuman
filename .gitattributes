@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026 Idiap Research Institute <contact@idiap.ch>
+# SPDX-License-Identifier: GPL-3.0-only
+* text=auto eol=lf
+# Frozen manifests validate the exact bytes of five Python source files.
+src/fakehuman/*.py text eol=lf
+# Bundled JSON retains its exact bytes.
+src/fakehuman/data/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Store the dependency lock with Git LFS.
+uv.lock filter=lfs diff=lfs merge=lfs -text

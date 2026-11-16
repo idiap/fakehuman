@@ -1,0 +1,95 @@
+# SPDX-FileCopyrightText: Copyright © 2026 Idiap Research Institute <contact@idiap.ch>
+# SPDX-FileContributor: William Droz <william.droz@idiap.ch>
+# SPDX-License-Identifier: GPL-3.0-only
+
+stages:
+  - check
+  - integration
+
+variables:
+  UV_VERSION: "0.12.22"
+  PYTHON_VERSION: "3.13"
+  BASE_LAYER: trixie-slim
+  UV_LINK_MODE: copy
+  UV_CACHE_DIR: .uv-cache
+  PREK_HOME: "$CI_PROJECT_DIR/.prek-cache"
+  FASTMCP_CHECK_FOR_UPDATES: "off"
+  FASTMCP_SHOW_SERVER_BANNER: "false"
+
+default:
+  image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  tags:
+    - docker
+    - linux
+  interruptible: true
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+  cache:
+    key:
+      files:
+        - uv.lock
+        - .pre-commit-config.yaml
+      prefix: uv-python$PYTHON_VERSION
+    paths:
+      - .uv-cache/
+      - .prek-cache/
+  after_script:
+    - uv cache prune --ci
+
+check:
+  stage: check
+  variables:
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends git ca-certificates
+  script:
+    - uv sync --locked --extra cpu --extra ui --group dev
+    - uv run --locked --extra cpu --extra ui prek run --all-files
+    - uv run --locked --extra cpu --extra ui pytest -m "not integration" --junitxml=reports/pytest.xml
+    - uv build --no-sources
+    - uv run --locked --extra cpu python scripts/check_wheel.py dist/*.whl
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit: reports/pytest.xml
+    paths:
+      - dist/
+
+# Real checkpoints are several GB. Run this job explicitly when changing model
+# adapters, CLI/MCP contracts or dependency versions; ordinary checks stay offline.
+models:
+  stage: integration
+  when: manual
+  allow_failure: true
+  variables:
+    HF_HOME: "$CI_PROJECT_DIR/.hf-cache"
+    HF_HUB_DISABLE_PROGRESS_BARS: "1"
+    FAKEHUMAN_RUN_MODEL_TESTS: "1"
+  cache:
+    - key:
+        files:
+          - uv.lock
+        prefix: uv-python$PYTHON_VERSION
+      paths:
+        - .uv-cache/
+    - key:
+        files:
+          - src/fakehuman/data/current_rules.json
+        prefix: pinned-models
+      paths:
+        - .hf-cache/
+  script:
+    - uv sync --locked --extra cpu --group dev
+    - uv run --locked --extra cpu fakehuman download-models
+    - uv run --locked --extra cpu pytest -m integration --junitxml=reports/models.xml
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit: reports/models.xml

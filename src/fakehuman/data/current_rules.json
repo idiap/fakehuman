@@ -1,0 +1,126 @@
+{
+  "schema_version": 2,
+  "rules": [
+    "lex_therefore_thus",
+    "lex_initial_however_nevertheless",
+    "lex_due_to",
+    "lex_a_brief_short"
+  ],
+  "seed": 17,
+  "evaluation_seeds": [
+    17,
+    42,
+    91
+  ],
+  "source_hashes": {
+    "rules.py": "c696458770f73857c0091bd901bce0e900b1dc42bdc35f2212131a1522985ab2",
+    "candidates_lexical.py": "5aad6cfe1b1c7ccf0c3673c64d2a1ee2d23a2950873a183f88f0a6c31671ae75",
+    "candidates_structural.py": "3f6776e8f74957007c0205e1e8d5d434f799823b1a65fbf2c7a4b1e44125d4dd",
+    "research_rules.py": "e9bcdb20332f307ddbd1de1922086cb6ad8e403044db9aaf5f107018c174967a",
+    "meaning.py": "8309a8ec128f572db568bb61e899266d25d08bcf93c47206196be73341cc2648"
+  },
+  "meaning_guard": {
+    "model_id": "cross-encoder/nli-deberta-v3-small",
+    "revision": "fa2804872c3b4bd748f38c0185cc85775361e735",
+    "license": "Apache-2.0",
+    "source": "https://huggingface.co/cross-encoder/nli-deberta-v3-small/tree/fa2804872c3b4bd748f38c0185cc85775361e735",
+    "config_source": "https://huggingface.co/cross-encoder/nli-deberta-v3-small/blob/fa2804872c3b4bd748f38c0185cc85775361e735/config.json",
+    "labels": {
+      "contradiction": 0,
+      "entailment": 1,
+      "neutral": 2
+    },
+    "entailment_threshold": 0.8,
+    "contradiction_threshold": 0.1,
+    "max_pair_tokens": 512,
+    "device": "cpu",
+    "batch_size": 8,
+    "loaded": false,
+    "trust_remote_code": false,
+    "use_safetensors": true,
+    "limitations": "English NLI probabilities are screening scores, not proof of meaning preservation. Long inputs are checked on sentence-aligned changed spans; unsafe alignment, insertions/deletions, or spans above 512 pair tokens fail closed."
+  },
+  "detectors": {
+    "fakespot_roberta": {
+      "name": "fakespot_roberta",
+      "model_id": "fakespot-ai/roberta-base-ai-text-detection-v1",
+      "revision": "f9cdb14d1f8b105f597d80fa7b56f20c6ea0e9db",
+      "license": "Apache-2.0",
+      "ai_label": "AI",
+      "ai_label_id": 1,
+      "max_tokens": 512,
+      "preprocessing": "fakespot_clean_text",
+      "limitations": "English; supervised RoBERTa component only, not the complete Apollo ensemble. Shares the RoBERTa base architecture with the other detector.",
+      "architecture": "sequence_classifier",
+      "activation": "softmax",
+      "source": "https://huggingface.co/fakespot-ai/roberta-base-ai-text-detection-v1",
+      "config_source": "https://huggingface.co/fakespot-ai/roberta-base-ai-text-detection-v1/blob/f9cdb14d1f8b105f597d80fa7b56f20c6ea0e9db/config.json",
+      "device": "cpu",
+      "batch_size": 8,
+      "overflow": "error",
+      "loaded": false,
+      "score_definition": "softmax(logits)[ai_label_id]; lower is better",
+      "weights_format": "safetensors",
+      "trust_remote_code": false
+    },
+    "desklib_deberta": {
+      "name": "desklib_deberta",
+      "model_id": "desklib/ai-text-detector-v1.01",
+      "revision": "5fdea974cd4287c61674951ec78803aa274e2fb7",
+      "license": "MIT",
+      "ai_label": "AI",
+      "ai_label_id": 0,
+      "max_tokens": 512,
+      "preprocessing": "none",
+      "limitations": "English; 435M-parameter DeBERTa-v3-large, approximately 1.74 GB weights. A single output logit means AI according to the published model card. This adapter conservatively limits inputs to 512 tokens.",
+      "architecture": "desklib_mean_pool",
+      "activation": "sigmoid",
+      "source": "https://huggingface.co/desklib/ai-text-detector-v1.01",
+      "config_source": "https://huggingface.co/desklib/ai-text-detector-v1.01/blob/5fdea974cd4287c61674951ec78803aa274e2fb7/config.json",
+      "device": "cpu",
+      "batch_size": 8,
+      "overflow": "error",
+      "loaded": false,
+      "score_definition": "sigmoid(single_AI_logit); lower is better",
+      "weights_format": "safetensors",
+      "trust_remote_code": false,
+      "label_source": "https://huggingface.co/desklib/ai-text-detector-v1.01/blob/5fdea974cd4287c61674951ec78803aa274e2fb7/README.md"
+    }
+  },
+  "status": "audited_and_evaluated_on_reused_development_corpus",
+  "evaluation": {
+    "protocol": "36231987a59fa8bfd00155b708de9ec71dab4f6b:research/rule-audit-2026-11-06/plan.md",
+    "corpus_sha256": "67fbd70a417ae791b9ee0f7b636dd3b695f13e89562dbdc0641db95f040d5b23",
+    "status": "complete",
+    "iteration": 2,
+    "correction": "Skip contrast rewrites that repeat still/even so in the same clause, found in blinded review.",
+    "date": "2026-11-06",
+    "catalog_rules": 135,
+    "corpus_passages": 120,
+    "ai_passages": 60,
+    "human_passages": 60,
+    "primary_trials": 138,
+    "sensitivity_trials": 4,
+    "paired_corpus_observations": 17040,
+    "matching_probes": 135,
+    "held_out": false,
+    "default_portfolio_changed": false,
+    "report": "36231987a59fa8bfd00155b708de9ec71dab4f6b:research/rule-audit-2026-11-06/report.md",
+    "results_sha256": "af8b93dd2f647b0d20f3276f2b94776a12cef64ce6f1165a3ab2b7d841c16602",
+    "summary_sha256": "fcb1a1fb48f644f4720154bb23331bf95f2756bbbfe04fe3a473fce99a3d2722",
+    "results_metadata_sha256": "eec4ff001f09510eacf589d487021211af4fbe2a6c0a70f342090734c3227211",
+    "probes_sha256": "36061e9fc4f3e2ea48b64a8faf308f77600ed188208fb4ed81ac20ffeba37124",
+    "packaged_rule_impacts_sha256": "ff00604bf1051865a8aa89ceea3eefa9a394de1cf40720817e0cb43c8358cd6a",
+    "sensitivity": {
+      "42": {
+        "results_sha256": "e606727642db367c9e5666c12a4281b5ed35718def871f80fee5b63ad4af519a",
+        "summary_sha256": "b18d93698be157dbe3411bcdb5b2b504dc73def1a80405f899192ab51102988e"
+      },
+      "91": {
+        "results_sha256": "260c84b8c6b280e0d571f2c9e5146da15c1acc9a7761af7c9cb2bd002f1c74d7",
+        "summary_sha256": "b8a9700215def93b993c948b828dde6a3e49466d9a73fbf6820797e13510a88a"
+      }
+    },
+    "limitations": "Reused exploratory development data, not a fresh holdout. Matching examples diagnose triggered behavior and are not included in general impact ratings. Automated preservation checks are not proof of semantic equivalence."
+  }
+}

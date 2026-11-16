@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Copyright © 2026 Idiap Research Institute <contact@idiap.ch>
+# SPDX-FileContributor: William Droz <william.droz@idiap.ch>
+# SPDX-License-Identifier: GPL-3.0-only
+
+[build-system]
+requires = ["uv_build>=0.11.0,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "fakehuman"
+version = "1.0.0"
+description = "MCP text processing with frozen rules, optional LLM rewriting, and local preservation checks"
+readme = "README.md"
+requires-python = ">=3.13"
+license = "GPL-3.0-only AND Apache-2.0 AND MIT"
+license-files = ["LICENSE", "LICENSES/*.txt", "THIRD_PARTY.md"]
+authors = [{ name = "William DROZ", email = "william.droz@idiap.ch" }]
+dependencies = [
+    "fastmcp==4.0.2",
+    "huggingface-hub>=0.34,<1",
+    "python-dotenv>=1,<2",
+    "torch>=2.6,<3",
+    "transformers>=4.48,<5",
+]
+
+[project.scripts]
+fakehuman = "fakehuman.cli:main"
+
+[project.optional-dependencies]
+cpu = ["torch>=2.6,<3"]
+ui = [
+    "nicegui>=3.0,<4",
+]
+
+[dependency-groups]
+dev = ["prek==0.5.4", "pytest~=9.0.2", "ruff==0.15.22"]
+
+# The CPU extra uses PyTorch's CPU wheels on Linux and Windows. macOS wheels
+# from PyPI already run without CUDA. Keep unrelated packages on PyPI.
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "cpu", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: opt-in tests using the real pinned model checkpoints"]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+# The bundled manifest validates these exact source bytes at server startup.
+exclude = [
+    "src/fakehuman/rules.py",
+    "src/fakehuman/candidates_lexical.py",
+    "src/fakehuman/candidates_structural.py",
+    "src/fakehuman/research_rules.py",
+    "src/fakehuman/meaning.py",
+]
